@@ -1,0 +1,271 @@
+﻿@using HiddenEncrypt.Helpers;
+@model HeroUW.Models.Formmodel
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
+    string MobileDomain = System.Web.Configuration.WebConfigurationManager.AppSettings["MobileDomain"];
+    string MainSiteDomain = System.Web.Configuration.WebConfigurationManager.AppSettings["MainSiteDomain"];
+    //Implement Google ReCaptcha By : Pasant on 12 May, 2020 for AC #1118
+    string recapthcaSiteKey = System.Configuration.ConfigurationManager.AppSettings["recaptchasitekey"];
+    string verifyNotRobot = HeroUW.Classes.ConstantString.VerifyNotRobot;
+    string clientID = "";
+    bool isghq = false;
+    string cn = "";
+    string UserBrowser = Request.Browser.Browser;
+
+    try
+    {
+        clientID = Request.QueryString["cid"];
+        isghq = Convert.ToBoolean(Request.QueryString["isghq"]);
+        cn = Convert.ToString(Request.QueryString["cn"]);
+    }
+    catch
+    {
+    }
+}
+
+@if (!ViewData.ModelState.IsValid)
+{
+    if (!ViewData.ModelState.ContainsKey("InvalidUserName"))
+    {
+        <script type="text/javascript">
+            $(function () {
+                disableDiv('dvPHQGHQLogin');
+                $('input:password[name=dummypass]').hide();
+                $('input:password[name=dummypass1]').hide();
+            });
+        </script>
+    }
+}
+@Scripts.Render("~/Scripts/Captcha")
+<script type="text/javascript" src="@Url.Content("~/Scripts/jquery.cookie.js?v="+@DateTime.Now.Ticks.ToString())"></script>
+<style type="text/css">
+
+    .validation-summary-errors {
+        width: 317px !important;
+        background: url(../../Content/Images/cross-icon.png) no-repeat left center;
+        margin-right: 20px;
+        background-position: 8px;
+        padding-left: 55px;
+        background-size: 40px 40px;
+        margin-left: 3em !important;
+        width: 286px !important;
+    }
+
+</style>
+
+<script type="text/javascript">
+    //Implement Google ReCaptcha By : Pasant on 12 May, 2020 for AC #1118
+    var siteKey = '@System.Configuration.ConfigurationManager.AppSettings["recaptchasitekey"]';
+    var secretKey = '@System.Configuration.ConfigurationManager.AppSettings["recaptchasecretkey"]';
+    var isCaptcha = true;
+    $(document).ready(function () {
+        @*var pageUrl = window.location.href;
+        //pageUrl = pageUrl.replace('@MainSiteDomain','@MobileDomain');
+
+        var startChar = pageUrl.indexOf('@MainSiteDomain') + '@MainSiteDomain'.length;
+        var replaceFrom = pageUrl.substring(0, startChar);
+        pageUrl = pageUrl.replace(replaceFrom, '@MobileDomain');
+
+        if ('@isghq' == 'False' && isMobile.any()) window.location.replace(pageUrl);   //Redirected to Mobile PHQ incase somehow logged from mobile device --subhank 2/15/15
+            *@
+        var PhqSelected = '@Model.isPHQLite';
+        $('#showNamePhq').text(PhqSelected);
+        setTimeout(function () {
+            $('#UserName').val('');
+            $('#Password').val('');
+        }, 100);
+        var $inputs = $('form :input[type="text"]');
+        var $inputs1 = $('form :input[type="password"]');
+        $inputs.each(function (index) {
+            if ($(this).attr("id").toLowerCase().indexOf("username") !== -1) {
+                $(this).attr("id", $(this).attr('id') + new Date().toDateString() + new Date().toTimeString());
+                $(this).addClass("dummyClass");
+
+            }
+        });
+        $inputs1.each(function (index) {
+            if ($(this).attr("id") != undefined) {
+                if ($(this).attr("id").toLowerCase().indexOf("password") !== -1) {
+                    $(this).attr("id", $(this).attr('id') + new Date().toDateString() + new Date().toTimeString());
+                    $(this).addClass("dummyClass");
+                }
+            }
+        });
+        $(".dummyclass").each(function () {
+            $(this).val('');
+        });
+    });
+
+    var isMobile = {
+        Android: function () {
+            return navigator.userAgent.match(/Android/i);
+        },
+        BlackBerry: function () {
+            return navigator.userAgent.match(/BlackBerry/i);
+        },
+        iOS: function () {
+            return navigator.userAgent.match(/iPhone|iPad|iPod/i);
+        },
+        Opera: function () {
+            return navigator.userAgent.match(/Opera Mini/i);
+        },
+        Windows: function () {
+            return navigator.userAgent.match(/IEMobile/i);
+        },
+        any: function () {
+            return (isMobile.Android() || isMobile.BlackBerry() || isMobile.iOS() || isMobile.Opera() || isMobile.Windows());
+        }
+    };
+    //    function PasswordTypeChange() {
+    //        $('input [type="Password"]').prop("type", "text");
+    //    }
+
+</script>
+@*Task - 2639 putting check for IE 11 browser - Paras*@
+@if (UserBrowser == "IE" || UserBrowser == "InternetExplorer" || UserBrowser == "Firefox" || UserBrowser == "Chrome" || UserBrowser == "Safari")
+{
+    if ((Request.Browser.Browser == "IE" || Request.Browser.Browser == "InternetExplorer") && Convert.ToInt16(Convert.ToDouble(Request.Browser.Version)) < Convert.ToInt16(System.Configuration.ConfigurationManager.AppSettings["MinIEVersion"]))
+    {
+
+        { Html.RenderPartial("Restrictedbrowser"); }
+    }
+    else
+    {
+        <div class="loginpanel PHQGHQLogin" id="dvPHQGHQLogin">
+            <div class="login dvRegisterPHQGHQLogin">
+                <div class="formHeader">
+                    Register
+                </div>
+                <div class="PHQGHQLoginpadding20">
+                    Don't have an account or first time user?<br />
+                    Click here to register for the @Html.DisplayFor(model => model.Title)
+                    <br />
+                    @if (String.Equals(Convert.ToString(Model.isGHQ), "true"))
+                    {
+                        <span>
+                            you have already registered for the  <span id="showNamePhq"></span> you may login
+                            using your existing UserName and Password.
+                        </span>
+                    }
+                    <div class="block PHQGHQLoginmargintop10">
+                        <div class="btnAddpaddingforCensus dvformindexregister registerPHQGHQ">
+                            <input type="submit" value="Register" class="greenButton registerPHQGHQ" name="Command" onclick="location.href='@Url.Action("Register", new { ClientID = Model.clientId, isGHQ = Model.isGHQ, formType = Model.formType })'" />
+                            @*<span class="Or">Or</span> <a id="cancel" href='@Url.Action("Index", "Dashboard")'>
+                                Cancel</a>*@
+                        </div>
+                    </div>
+                    <br />
+                    <br />
+                    <span class="PHQGHQLoginErrorcolor">@Model.ErrorMesage</span>
+                </div>
+            </div>
+            <div class="login dvLoginPHQGHQLogin">
+                <div class="formHeader">
+                    Login
+                </div>
+                @* <div class="title">
+                    Please enter your UserName and Password to login.</div>*@
+                <div class="dvformindexloginform">
+                    @using (Html.BeginForm("Submit", "Forms", FormMethod.Post, new { autocomplete = "off" }))
+                    {
+                        ////Updated By Peter Prateek on Nov 13,2014 for Active Collab ID:190
+                        @Html.AntiForgeryToken()
+                        <div id="dvValidationSummary" class="dvValidationsummaryPHQGHQLogin">
+                            @Html.ValidationSummary(true)
+                        </div>
+                        <div class="dvLoginpanelinnerPHQGHQ">
+                            @Html.EncryptedHiddenFor(model => model.clientId, Model.clientId)
+                            @Html.EncryptedHiddenFor(model => model.isGHQ, Model.isGHQ)
+                            @Html.EncryptedHiddenFor(model => model.Title, Model.Title)
+                            @Html.EncryptedHiddenFor(model => model.ContactPhone, Model.ContactPhone)
+                            @Html.EncryptedHiddenFor(model => model.ContactName, Model.ContactName)
+                            @* @Html.HiddenFor(model => model.ContactEmail)  // Commented by kavita to make login link clickable even if email is blank bcz is required*@
+                            <div>
+                                @*<div class="labelBold">
+        @Html.LabelFor(model => model.UserName)</div>*@
+                                <div class="Logininput">
+                                    @Html.TextBoxFor(model => model.UserName, new { @tabindex = 2, placeholder = "Username" })
+                                </div>
+                                <span>@Html.ValidationMessageFor(m => m.UserName)</span>
+                                <div>
+                                    @*<div class="labelBold">
+                @Html.LabelFor(model => model.Password)
+            </div>*@
+                                    <div class="Logininput" style="margin-top:9px; margin-bottom: 0px;">
+                                        <input type="password" name="dummypass" value="" disabled="disabled" style="display: inline; width: 0; height: 0; border: 0;margin-left:-27px;" />
+                                        <input type="password" name="dummypass1" value="" style="display: inline; width: 0; height: 0; border: 0;margin-left:-15px" />@Html.PasswordFor(model => model.Password, new { tabindex = 3, placeholder = "Password" })
+                                    </div>
+                                    <span>@Html.ValidationMessageFor(model => model.Password)</span>
+                                </div>
+                                <div class="loginActions">
+                                    @if (ViewData.ModelState.IsValid || ViewData.ModelState.ContainsKey("InvalidUserName"))
+                                    {
+                                        @Html.ActionLink("Forgot Password?", "PasswordRecovery", "Account", new { cid = @clientID, isghq = @isghq, cn = @cn }, new { style = "position:relative;right:35px;", tabindex = 5 })
+                                    }
+                                    else
+                                    {
+                                        <a href="#" style="position: relative; right: 35px;" taborder="5">Forgot Password?</a>
+                                    }
+                                </div>
+                                <br />
+                                @*Implement Google ReCaptcha By : Pasant on 12 May, 2020 for AC #1118*@
+                                <div class="loginActions">
+                                    <div id="dvcaptchacontent" class="m-login__form-action">
+                                        <div class="g-recaptcha" data-sitekey=@recapthcaSiteKey data-callback="correctCaptcha" data-badge="inline"></div>
+                                        <div class="m--align-left">
+                                            <label id="Iam-notrobot-error" class="text-danger" style="color:red;">
+                                                <span class="m-form__help text-danger row"> @verifyNotRobot </span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="block">
+                                    <div class="dvSubmit submitPeo">
+                                        <input id="m_login_signin_submit" type="submit" value="Login" name="Command" tabindex="4" />
+                                        <input type="password" name="dummypass" value="dummypass" style="display: inline; width: 0; height: 0; border: 0;" />
+                                        @*<input type="password" name="dummypass2" value="t" style="display: inline; width: 0; height: 0; border: 0;margin:0px;padding:0px;" tabindex="15" />  <input type="password" name="dummypass3" value="t" disabled="disabled" style="display: inline; width: 0; height: 0; border: 0;" tabindex="15"/>*@
+                                        @*<span class="Or">Or</span> <a id="cancel" href='@Url.Action("Index", "Dashboard")'>
+                Cancel</a>*@
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="loginpanel dvNotesPHQGHQLogin">
+            <div class="clear PHQGHQLoginheartbleednotes dvBorderbottomNone">
+                If you have any questions or need assistance, please email <a href="mailto:@Model.ContactEmail" title="@Model.ContactEmail">@Model.ContactName</a>
+            </div>
+            @*Commented By Peter Prateek for Active Collab ID: 153 on Aug 28, 2014 *@
+            @*<div class="clear PHQGHQLoginheartbleednotes notesleftmargin dvNotesinnerPHQGHQLogin Datephq dvBorderTopNone" >
+                <a style="float:left;" href='@Url.Action("PasswordPolicy","Account")' target="_blank">
+                <img width="16" height="16" style="border:0;" src="/Content/Images/info.png" alt="Password Policy" class="divimg">
+                </a>
+                <div class="dvContentPHQGHQLogin" style="margin-top:2px;">Our password policy has changed. <a href='@Url.Action("PasswordPolicy","Account")' target="_blank">Click here</a> to know more.</div>
+                </div>*@
+        </div>
+
+
+    }
+}
+else
+{
+    { Html.RenderPartial("Restrictedbrowser"); }
+}
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}
+<script src="https://www.google.com/recaptcha/api.js">
+</script>
+<script type="text/javascript" language="javascript">
+    $(window).bind("load", function () {
+        setTimeout(function () {
+            $(".dummyClass").each(function () {
+                $(this).val('');
+            });
+        }, 100);
+    });
+</script>

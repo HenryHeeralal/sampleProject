@@ -1,0 +1,204 @@
+﻿@model HeroUW.Models.Formmodel
+@{
+    ViewBag.Title = "Login";
+    Layout = "~/Views/Shared/_MainLayout.cshtml";
+    string UserBrowser = Request.Browser.Browser;
+    var stringKey = @System.Configuration.ConfigurationManager.AppSettings["AdminEmail"].ToString();
+    //Implement Google ReCaptcha By : Pasant on 12 May, 2020 for AC #1118
+    string recapthcaSiteKey = System.Configuration.ConfigurationManager.AppSettings["recaptchasitekey"];
+    string verifyNotRobot = HeroUW.Classes.ConstantString.VerifyNotRobot;
+}
+<style>
+    .dvContentPHQGHQLogin {
+        margin-top: 3px;
+        margin-bottom: 0px;
+        float: left;
+        margin-left: 5px;
+        height: 20px;
+    }
+
+    .GPALoginNotes {
+        background-color: #E8E8E8;
+        border-bottom: 1px solid #CCCCCC;
+        /*border-top: 1px solid #CCCCCC;*/
+        bottom: 80px;
+        color: #333333;
+        /*font-family: Verdana;*/
+        font-size: 11px;
+        height: auto;
+        line-height: 1.6em !important;
+        margin-left: 79px;
+        padding: 11px;
+        padding-bottom: 0px;
+        position: relative;
+        vertical-align: middle !important;
+        width: 867px !important;
+    }
+
+    .PHQGHQLoginheartbleednotes {
+        background-color: #E8E8E8;
+        border-bottom: 1px solid #CCCCCC;
+        border-top: 1px solid #CCCCCC;
+        bottom: 80px;
+        color: #333333;
+        /*font-family: Verdana;*/
+        font-size: 11px;
+        height: auto;
+        line-height: 1.6em !important;
+        padding: 5px;
+        position: relative;
+        vertical-align: middle !important;
+        width: 879px;
+    }
+
+    .validation-summary-errors {
+        background: rgba(0, 0, 0, 0) url("../../Content/Images/cross-icon.png") no-repeat scroll 8px center / 40px 40px;
+        margin-right: 20px;
+        padding-left: 55px;
+        width: 286px;
+        margin-left: 3em !important;
+    }
+</style>
+
+@Scripts.Render("~/Scripts/Captcha")
+<script type="text/javascript">
+    //Implement Google ReCaptcha By : Pasant on 12 May, 2020 for AC #1118
+    var siteKey = '@System.Configuration.ConfigurationManager.AppSettings["recaptchasitekey"]';
+    var secretKey = '@System.Configuration.ConfigurationManager.AppSettings["recaptchasecretkey"]';
+    var isCaptcha = true;
+    $(document).ready(function () {
+        $('#processing').css("visibility", "hidden");
+        var $inputs = $('form :input[type="text"]');
+        var $inputs1 = $('form :input[type="password"]');
+        $inputs.each(function (index) {
+            if ($(this).attr("id").toLowerCase().indexOf("username") !== -1) {
+                $(this).attr("id", $(this).attr('id') + new Date().toDateString() + new Date().toTimeString());
+                $(this).addClass("dummyClass");
+
+            }
+        });
+        $inputs1.each(function (index) {
+            if ($(this).attr("id").toLowerCase().indexOf("password") !== -1) {
+                $(this).attr("id", $(this).attr('id') + new Date().toDateString() + new Date().toTimeString());
+                $(this).addClass("dummyClass");
+            }
+        });
+        $(".dummyClass").each(function () {
+            $(this).val('');
+        });
+    });
+</script>
+@*Task - 2639 putting check for IE 11 browser - Paras*@
+@if (UserBrowser == "IE" || UserBrowser == "InternetExplorer" || UserBrowser == "Firefox" || UserBrowser == "Chrome" || UserBrowser == "Safari")
+{
+    if ((Request.Browser.Browser == "IE" || Request.Browser.Browser == "InternetExplorer") && Convert.ToInt16(Convert.ToDouble(Request.Browser.Version)) < Convert.ToInt16(System.Configuration.ConfigurationManager.AppSettings["MinIEVersion"]))
+    {
+
+        { Html.RenderPartial("Restrictedbrowser"); }
+    }
+    else
+    {
+        <div class="loginpanel PHQGHQLogin" id="dvPHQGHQLogin">
+            <div class="login dvRegisterPHQGHQLogin margintop160">
+                <div class="formHeader">
+                    Register
+                </div>
+                <div class="PHQGHQLoginpadding20">
+                    Click here to register for Hero underwriting services.
+                    <div class="block PHQGHQLoginmargintop10">
+                        <div class="btnAddpaddingforCensus dvformindexregister registerPHQGHQ">
+                            <input type="submit" value="Register" class="greenButton registerPHQGHQ" name="Command"
+                                   onclick="location.href='@Url.Action("Register", "GPAForm")'" />
+                        </div>
+                    </div>
+                    <br />
+                    <br />
+                </div>
+            </div>
+            <div class="login dvLoginPHQGHQLogin margintop160">
+                <div class="formHeader">
+                    Login
+                </div>
+                @* <div class="title">
+                    Please enter your Username and Password to login.</div>*@
+                <div class="dvformindexloginform">
+                    @using (Html.BeginForm("Login", "GpaAccount", FormMethod.Post, new { autocomplete = "off" }))
+                    {
+                        ////Updated By Peter Prateek on Nov 13,2014 for Active Collab ID:190
+                        @Html.AntiForgeryToken()
+                        <div id="dvValidationSummary" class="dvValidationsummaryPHQGHQLogin">
+                            @Html.ValidationSummary(true)
+                        </div>
+                        <div class="dvLoginpanelinnerPHQGHQ">
+                            <div>
+                                @*<div class="labelBold">
+        @Html.LabelFor(model => model.UserName)</div>*@
+                                <div class="Logininput">
+                                    @Html.TextBoxFor(model => model.UserName, new { @tabindex = 2, placeholder = "Username" })
+                                </div>
+                                <span>@Html.ValidationMessageFor(m => m.UserName)</span>
+                                <div>
+                                    @* <div class="labelBold">
+                @Html.LabelFor(model => model.Password)
+            </div>*@
+                                    <div class="Logininput" style="margin-top:25px; margin-bottom: 0px;"><input type="password" name="dummypass" value="" style="display: inline; width: 0; height: 0; border: 0;margin:0px;padding:0px;" tabindex="25" ; />@Html.PasswordFor(model => model.Password, new { @tabindex = 3, placeholder = "Password" })</div>
+                                    <span>@Html.ValidationMessageFor(model => model.Password)</span>
+                                </div>
+                                <div class="loginActions">
+                                    @Html.EncodedActionLink("Forgot Password?", "PasswordRecovery", "Account", new { isgpa = true }, new { style = "position:relative;right:35px;", tabindex = 5 })
+                                </div>
+                                <br />
+                                @*Implement Google ReCaptcha By : Pasant on 12 May, 2020 for AC #1118*@
+                                <div class="loginActions">
+                                    <div class="m-login__form-action">
+                                        <div class="g-recaptcha" data-sitekey=@recapthcaSiteKey data-callback="correctCaptcha" data-badge="inline"></div>
+                                        <div class="m--align-left">
+                                            <label id="Iam-notrobot-error" class="text-danger" style="color:red;">
+                                                <span class="m-form__help text-danger row"> @verifyNotRobot </span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="block">
+                                    <div class="dvSubmit submitPeo">
+                                        <input id="m_login_signin_submit" type="submit" value="Login" name="Command" tabindex="4" />
+                                        <input type="password" name="dummypass" value="dummypass" style="display: inline; width: 0; height: 0; border: 0;" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="loginpanel dvNotesPHQGHQLogin">
+            <div class="clear GPALoginNotes notesleftmargin dvNotesinnerPHQGHQLogin dvBorderbottomNone">
+                If you have questions or need assistance please email <a href="mailto:@stringKey" title="">Administrator</a>
+            </div>
+            @*Commented By Peter Prateek for Active Collab ID: 153 on Aug 28, 2014 *@
+            @*<div class="clear PHQGHQLoginheartbleednotes notesleftmargin dvNotesinnerPHQGHQLogin Datephq dvBorderTopNone" >
+                <a style="float:left;" href='@Url.Action("PasswordPolicy","Account")' target="_blank">
+                <img width="15" height="18" style="border:0;" src="/Content/Images/info.png" alt="Password Policy" class="divimg">
+                </a>
+                <div class="dvContentPHQGHQLogin">Our password policy has changed. <a href='@Url.Action("PasswordPolicy","Account")' target="_blank">Click here</a> to know more.</div>
+                </div>*@
+        </div>
+
+
+    }
+}
+else
+{
+    { Html.RenderPartial("Restrictedbrowser"); }
+}
+<script src="https://www.google.com/recaptcha/api.js">
+</script>
+<script type="text/javascript" language="javascript">
+    $(window).bind("load", function () {
+        setTimeout(function () {
+            $(".dummyClass").each(function () {
+                $(this).val('');
+            });
+        }, 100);
+    });
+</script>
